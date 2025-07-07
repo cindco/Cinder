@@ -326,7 +326,6 @@ endif()
 
 if( CINDER_IMGUI_ENABLED )
 	list( APPEND SRC_SET_CINDER_IMGUI ${CINDER_SRC_DIR}/cinder/CinderImGui.cpp )
-	ci_log_v( "CINDER_IMGUI_DIR: ${CINDER_IMGUI_DIR}" )
 	if( CINDER_IMGUI_DIR )
 		list( APPEND SRC_SET_IMGUI
 			${CINDER_IMGUI_DIR}/imgui.cpp
