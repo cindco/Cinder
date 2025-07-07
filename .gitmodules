@@ -26,3 +26,7 @@
 	path = include/nlohmann
 	url = https://github.com/nlohmann/json.git
 	branch = develop
+[submodule "include/zlib"]
+	path = include/zlib
+	url = https://github.com/madler/zlib.git
+	branch = master
