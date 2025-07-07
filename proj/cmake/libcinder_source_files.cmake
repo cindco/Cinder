@@ -229,7 +229,10 @@ source_group( "thirdparty\\tinyexr" FILES   ${SRC_SET_TINYEXR} )
 if( NOT CINDER_GL_ES )
 
 list( APPEND SRC_SET_GLAD
-	${CINDER_SRC_DIR}/glad/glad.c
+    ${CINDER_SRC_DIR}/glad/glad.c
+    ${CINDER_SRC_DIR}/glad/glad_wgl.c
+    ${CINDER_SRC_DIR}/glad/glad_glx.c
+    ${CINDER_SRC_DIR}/glad/glad_egl.c
 )
 
 list( APPEND CINDER_SRC_FILES               ${SRC_SET_GLAD} )

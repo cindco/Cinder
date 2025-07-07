@@ -24,6 +24,8 @@
 
 #pragma once
 
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "cinder/Cinder.h"
 
 #include "glm/gtc/type_ptr.hpp"

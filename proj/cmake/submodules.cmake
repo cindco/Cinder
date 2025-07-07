@@ -1,7 +1,7 @@
 # Submodules configuration for Cinder
 # This file configures external libraries as Git submodules
 
-# Set submodule paths relative to Cinder root (self-contained approach)
+# Set submodule paths relative to Cinder root
 set( CINDER_SUBMODULES_DIR "${CINDER_PATH}/include" )
 
 # Configure ImGui submodule
@@ -29,13 +29,20 @@ else()
     message( FATAL_ERROR "GLFW submodule not found at ${CINDER_SUBMODULES_DIR}/glfw" )
 endif()
 
-# Configure GLAD submodule
-if( EXISTS "${CINDER_SUBMODULES_DIR}/glad" )
-    set( CINDER_GLAD_DIR "${CINDER_SUBMODULES_DIR}/glad" )
-    list( APPEND CINDER_INCLUDE_SYSTEM_PRIVATE ${CINDER_GLAD_DIR}/include )
-    ci_log_v( "Using GLAD submodule from: ${CINDER_GLAD_DIR}" )
+# Configure GLAD headers (use pre-generated files, generated from https://gen.glad.sh/)
+set(CINDER_GLAD_INCLUDE_DIR "${CINDER_PATH}/include/glad")
+set(CINDER_KHR_INCLUDE_DIR "${CINDER_PATH}/include/KHR")
+if(EXISTS "${CINDER_GLAD_INCLUDE_DIR}/glad.h" AND EXISTS "${CINDER_GLAD_INCLUDE_DIR}/glad_wgl.h" AND EXISTS "${CINDER_GLAD_INCLUDE_DIR}/glad_glx.h" AND EXISTS "${CINDER_GLAD_INCLUDE_DIR}/glad_egl.h")
+    list(APPEND CINDER_INCLUDE_SYSTEM_PRIVATE ${CINDER_GLAD_INCLUDE_DIR})
+    ci_log_v("Using pre-generated GLAD headers from: ${CINDER_GLAD_INCLUDE_DIR}")
 else()
-    message( FATAL_ERROR "GLAD submodule not found at ${CINDER_SUBMODULES_DIR}/glad" )
+    message(FATAL_ERROR "GLAD headers not found at ${CINDER_GLAD_INCLUDE_DIR} (expected glad.h, glad_wgl.h, glad_glx.h, glad_egl.h)")
+endif()
+if(EXISTS "${CINDER_KHR_INCLUDE_DIR}/khrplatform.h")
+    list(APPEND CINDER_INCLUDE_SYSTEM_PRIVATE ${CINDER_KHR_INCLUDE_DIR})
+    ci_log_v("Using pre-generated KHR headers from: ${CINDER_KHR_INCLUDE_DIR}")
+else()
+    message(FATAL_ERROR "KHR header not found at ${CINDER_KHR_INCLUDE_DIR}/khrplatform.h")
 endif()
 
 # Configure nlohmann/json submodule
