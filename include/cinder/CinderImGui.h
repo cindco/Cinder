@@ -29,7 +29,7 @@
 #if ! defined( CINDER_IMGUI_EXTERNAL )
 #include "imgui/imgui.h"
 #else
-#include "imgui.h"
+#include "../../imgui/imgui.h"
 #endif
 
 #include "cinder/Filesystem.h"

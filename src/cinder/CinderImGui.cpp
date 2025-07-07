@@ -101,8 +101,8 @@ namespace ImGui {
 		mStyle.Colors[ImGuiCol_TabActive] = orangeActive; // orangeBright;
 		mStyle.Colors[ImGuiCol_TabUnfocused] = orangeDimmed;
 		mStyle.Colors[ImGuiCol_TabUnfocusedActive] = orangeActive;
-		//mStyle.Colors[ImGuiCol_DockingPreview] = grayInactive;
-		//mStyle.Colors[ImGuiCol_DockingEmptyBg] = ImVec4( 0.20f, 0.20f, 0.20f, 1.00f );
+		mStyle.Colors[ImGuiCol_DockingPreview] = grayInactive;
+		mStyle.Colors[ImGuiCol_DockingEmptyBg] = ImVec4( 0.20f, 0.20f, 0.20f, 1.00f );
 		mStyle.Colors[ImGuiCol_PlotLines] = ImVec4( 0.93f, 0.96f, 0.95f, 0.80f );
 		mStyle.Colors[ImGuiCol_PlotLinesHovered] = grayInactive;
 		mStyle.Colors[ImGuiCol_PlotHistogram] = ImVec4( 0.93f, 0.96f, 0.95f, 0.80f );
@@ -328,7 +328,7 @@ namespace ImGui {
 		if( values.empty() ) return false;
 		
 		bool changed = false;
-		if( ImGui::ListBoxHeader( label, (int)values.size(), height_in_items ) ) {
+		if( ImGui::BeginListBox(label, ImVec2(-FLT_MIN, height_in_items * ImGui::GetTextLineHeightWithSpacing())) ) {
 			for( int i = 0; i < (int)values.size(); ++i ) {
 				ImGui::PushID( (void*)(intptr_t)i );
 				bool selected = ( *currIndex == i );
@@ -339,7 +339,7 @@ namespace ImGui {
 				if( selected ) ImGui::SetItemDefaultFocus();
 				ImGui::PopID();
 			}
-			ImGui::ListBoxFooter();
+			ImGui::EndListBox();
 		}
 		return changed;
 	}
@@ -398,7 +398,47 @@ static void ImGui_ImplCinder_KeyDown( ci::app::KeyEvent& event )
 	uint32_t character = event.getCharUtf32();
 #endif
 
-	io.KeysDown[event.getCode()] = true;
+	// Convert Cinder key codes to ImGui key codes
+	ImGuiKey imguiKey = ImGuiKey_None;
+	switch (event.getCode()) {
+		case ci::app::KeyEvent::KEY_TAB: imguiKey = ImGuiKey_Tab; break;
+		case ci::app::KeyEvent::KEY_LEFT: imguiKey = ImGuiKey_LeftArrow; break;
+		case ci::app::KeyEvent::KEY_RIGHT: imguiKey = ImGuiKey_RightArrow; break;
+		case ci::app::KeyEvent::KEY_UP: imguiKey = ImGuiKey_UpArrow; break;
+		case ci::app::KeyEvent::KEY_DOWN: imguiKey = ImGuiKey_DownArrow; break;
+		case ci::app::KeyEvent::KEY_PAGEUP: imguiKey = ImGuiKey_PageUp; break;
+		case ci::app::KeyEvent::KEY_PAGEDOWN: imguiKey = ImGuiKey_PageDown; break;
+		case ci::app::KeyEvent::KEY_HOME: imguiKey = ImGuiKey_Home; break;
+		case ci::app::KeyEvent::KEY_END: imguiKey = ImGuiKey_End; break;
+		case ci::app::KeyEvent::KEY_INSERT: imguiKey = ImGuiKey_Insert; break;
+		case ci::app::KeyEvent::KEY_DELETE: imguiKey = ImGuiKey_Delete; break;
+		case ci::app::KeyEvent::KEY_BACKSPACE: imguiKey = ImGuiKey_Backspace; break;
+		case ci::app::KeyEvent::KEY_SPACE: imguiKey = ImGuiKey_Space; break;
+		case ci::app::KeyEvent::KEY_RETURN: imguiKey = ImGuiKey_Enter; break;
+		case ci::app::KeyEvent::KEY_ESCAPE: imguiKey = ImGuiKey_Escape; break;
+		case ci::app::KeyEvent::KEY_LCTRL: imguiKey = ImGuiKey_LeftCtrl; break;
+		case ci::app::KeyEvent::KEY_LSHIFT: imguiKey = ImGuiKey_LeftShift; break;
+		case ci::app::KeyEvent::KEY_LALT: imguiKey = ImGuiKey_LeftAlt; break;
+		case ci::app::KeyEvent::KEY_LMETA: imguiKey = ImGuiKey_LeftSuper; break;
+		case ci::app::KeyEvent::KEY_RCTRL: imguiKey = ImGuiKey_RightCtrl; break;
+		case ci::app::KeyEvent::KEY_RSHIFT: imguiKey = ImGuiKey_RightShift; break;
+		case ci::app::KeyEvent::KEY_RALT: imguiKey = ImGuiKey_RightAlt; break;
+		case ci::app::KeyEvent::KEY_RMETA: imguiKey = ImGuiKey_RightSuper; break;
+		default:
+			// Handle letter keys
+			if (event.getCode() >= 'A' && event.getCode() <= 'Z') {
+				imguiKey = (ImGuiKey)(ImGuiKey_A + (event.getCode() - 'A'));
+			}
+			// Handle number keys
+			else if (event.getCode() >= '0' && event.getCode() <= '9') {
+				imguiKey = (ImGuiKey)(ImGuiKey_0 + (event.getCode() - '0'));
+			}
+			break;
+	}
+
+	if (imguiKey != ImGuiKey_None) {
+		io.AddKeyEvent(imguiKey, true);
+	}
 
 	if( !event.isAccelDown() && character > 0 && character <= 255 ) {
 		io.AddInputCharacter( (char)character );
@@ -422,10 +462,65 @@ static void ImGui_ImplCinder_KeyUp( ci::app::KeyEvent& event )
 {
 	ImGuiIO& io = ImGui::GetIO();
 
-	io.KeysDown[event.getCode()] = false;
+	// Convert Cinder key codes to ImGui key codes (same mapping as KeyDown)
+	ImGuiKey imguiKey = ImGuiKey_None;
+	switch (event.getCode()) {
+		case ci::app::KeyEvent::KEY_TAB: imguiKey = ImGuiKey_Tab; break;
+		case ci::app::KeyEvent::KEY_LEFT: imguiKey = ImGuiKey_LeftArrow; break;
+		case ci::app::KeyEvent::KEY_RIGHT: imguiKey = ImGuiKey_RightArrow; break;
+		case ci::app::KeyEvent::KEY_UP: imguiKey = ImGuiKey_UpArrow; break;
+		case ci::app::KeyEvent::KEY_DOWN: imguiKey = ImGuiKey_DownArrow; break;
+		case ci::app::KeyEvent::KEY_PAGEUP: imguiKey = ImGuiKey_PageUp; break;
+		case ci::app::KeyEvent::KEY_PAGEDOWN: imguiKey = ImGuiKey_PageDown; break;
+		case ci::app::KeyEvent::KEY_HOME: imguiKey = ImGuiKey_Home; break;
+		case ci::app::KeyEvent::KEY_END: imguiKey = ImGuiKey_End; break;
+		case ci::app::KeyEvent::KEY_INSERT: imguiKey = ImGuiKey_Insert; break;
+		case ci::app::KeyEvent::KEY_DELETE: imguiKey = ImGuiKey_Delete; break;
+		case ci::app::KeyEvent::KEY_BACKSPACE: imguiKey = ImGuiKey_Backspace; break;
+		case ci::app::KeyEvent::KEY_SPACE: imguiKey = ImGuiKey_Space; break;
+		case ci::app::KeyEvent::KEY_RETURN: imguiKey = ImGuiKey_Enter; break;
+		case ci::app::KeyEvent::KEY_ESCAPE: imguiKey = ImGuiKey_Escape; break;
+		case ci::app::KeyEvent::KEY_LCTRL: imguiKey = ImGuiKey_LeftCtrl; break;
+		case ci::app::KeyEvent::KEY_LSHIFT: imguiKey = ImGuiKey_LeftShift; break;
+		case ci::app::KeyEvent::KEY_LALT: imguiKey = ImGuiKey_LeftAlt; break;
+		case ci::app::KeyEvent::KEY_LMETA: imguiKey = ImGuiKey_LeftSuper; break;
+		case ci::app::KeyEvent::KEY_RCTRL: imguiKey = ImGuiKey_RightCtrl; break;
+		case ci::app::KeyEvent::KEY_RSHIFT: imguiKey = ImGuiKey_RightShift; break;
+		case ci::app::KeyEvent::KEY_RALT: imguiKey = ImGuiKey_RightAlt; break;
+		case ci::app::KeyEvent::KEY_RMETA: imguiKey = ImGuiKey_RightSuper; break;
+		default:
+			// Handle letter keys
+			if (event.getCode() >= 'A' && event.getCode() <= 'Z') {
+				imguiKey = (ImGuiKey)(ImGuiKey_A + (event.getCode() - 'A'));
+			}
+			// Handle number keys
+			else if (event.getCode() >= '0' && event.getCode() <= '9') {
+				imguiKey = (ImGuiKey)(ImGuiKey_0 + (event.getCode() - '0'));
+			}
+			break;
+	}
 
+	if (imguiKey != ImGuiKey_None) {
+		io.AddKeyEvent(imguiKey, false);
+	}
+
+	// Clear accelerator keys
 	for( auto key : sAccelKeys ) {
-		io.KeysDown[key] = false;
+		// Convert accelerator keys to ImGui keys if needed
+		ImGuiKey accelImguiKey = ImGuiKey_None;
+		switch (key) {
+			case ci::app::KeyEvent::KEY_LCTRL: accelImguiKey = ImGuiKey_LeftCtrl; break;
+			case ci::app::KeyEvent::KEY_LSHIFT: accelImguiKey = ImGuiKey_LeftShift; break;
+			case ci::app::KeyEvent::KEY_LALT: accelImguiKey = ImGuiKey_LeftAlt; break;
+			case ci::app::KeyEvent::KEY_LMETA: accelImguiKey = ImGuiKey_LeftSuper; break;
+			case ci::app::KeyEvent::KEY_RCTRL: accelImguiKey = ImGuiKey_RightCtrl; break;
+			case ci::app::KeyEvent::KEY_RSHIFT: accelImguiKey = ImGuiKey_RightShift; break;
+			case ci::app::KeyEvent::KEY_RALT: accelImguiKey = ImGuiKey_RightAlt; break;
+			case ci::app::KeyEvent::KEY_RMETA: accelImguiKey = ImGuiKey_RightSuper; break;
+		}
+		if (accelImguiKey != ImGuiKey_None) {
+			io.AddKeyEvent(accelImguiKey, false);
+		}
 	}
 	sAccelKeys.clear();
 
@@ -483,26 +578,11 @@ static bool ImGui_ImplCinder_Init( const ci::app::WindowRef& window, const ImGui
 	ImGuiIO& io = ImGui::GetIO();
 	io.BackendPlatformName = "imgui_impl_cinder";
 
-	// Keyboard mapping. ImGui will use those indices to peek into the io.KeyDown[] array.
-	io.KeyMap[ImGuiKey_Tab] = ci::app::KeyEvent::KEY_TAB;
-	io.KeyMap[ImGuiKey_LeftArrow] = ci::app::KeyEvent::KEY_LEFT;
-	io.KeyMap[ImGuiKey_RightArrow] = ci::app::KeyEvent::KEY_RIGHT;
-	io.KeyMap[ImGuiKey_UpArrow] = ci::app::KeyEvent::KEY_UP;
-	io.KeyMap[ImGuiKey_DownArrow] = ci::app::KeyEvent::KEY_DOWN;
-	io.KeyMap[ImGuiKey_Home] = ci::app::KeyEvent::KEY_HOME;
-	io.KeyMap[ImGuiKey_End] = ci::app::KeyEvent::KEY_END;
-	io.KeyMap[ImGuiKey_Delete] = ci::app::KeyEvent::KEY_DELETE;
-	io.KeyMap[ImGuiKey_Backspace] = ci::app::KeyEvent::KEY_BACKSPACE;
-	io.KeyMap[ImGuiKey_Enter] = ci::app::KeyEvent::KEY_RETURN;
-	io.KeyMap[ImGuiKey_Escape] = ci::app::KeyEvent::KEY_ESCAPE;
-	io.KeyMap[ImGuiKey_A] = ci::app::KeyEvent::KEY_a;
-	io.KeyMap[ImGuiKey_C] = ci::app::KeyEvent::KEY_c;
-	io.KeyMap[ImGuiKey_V] = ci::app::KeyEvent::KEY_v;
-	io.KeyMap[ImGuiKey_X] = ci::app::KeyEvent::KEY_x;
-	io.KeyMap[ImGuiKey_Y] = ci::app::KeyEvent::KEY_y;
-	io.KeyMap[ImGuiKey_Z] = ci::app::KeyEvent::KEY_z;
-	io.KeyMap[ImGuiKey_Insert] = ci::app::KeyEvent::KEY_INSERT;
-	io.KeyMap[ImGuiKey_Space] = ci::app::KeyEvent::KEY_SPACE;
+	// Enable docking support
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+	
+	// Note: Viewport support would require platform-specific backend initialization
+	// For now, we'll enable docking without viewports to avoid platform dependencies
 
 	ImGuiStyle& imGuiStyle = ImGui::GetStyle();
 	imGuiStyle = options.getStyle();
@@ -578,6 +658,9 @@ bool ImGui::Initialize( const ImGui::Options& options )
 #else
 	ImGui_ImplOpenGL3_Init();
 #endif
+
+	// Note: Viewport support would require platform-specific backend initialization
+	// For now, we'll enable docking without viewports to avoid platform dependencies
 	
 	ImGui_ImplCinder_Init( window, options );
 	if( options.isAutoRenderEnabled() ) {

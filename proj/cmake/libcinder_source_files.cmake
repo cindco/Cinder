@@ -229,8 +229,16 @@ source_group( "thirdparty\\tinyexr" FILES   ${SRC_SET_TINYEXR} )
 if( NOT CINDER_GL_ES )
 
 list( APPEND SRC_SET_GLAD
-	${CINDER_SRC_DIR}/glad/glad.c
+    ${CINDER_SRC_DIR}/glad/glad.c
 )
+
+if( MSVC )
+    list( APPEND SRC_SET_GLAD ${CINDER_SRC_DIR}/glad/glad_wgl.c )
+elseif( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
+    list( APPEND SRC_SET_GLAD ${CINDER_SRC_DIR}/glad/glad_glx.c )
+elseif( ANDROID )
+    list( APPEND SRC_SET_GLAD ${CINDER_SRC_DIR}/glad/glad_egl.c )
+endif()
 
 list( APPEND CINDER_SRC_FILES               ${SRC_SET_GLAD} )
 source_group( "thirdparty\\glad" FILES      ${SRC_SET_GLAD} )
@@ -365,49 +373,49 @@ endif()
 
 if( NOT CINDER_FREETYPE_USE_SYSTEM )
 	list( APPEND SRC_SET_FREETYPE
-		${CINDER_SRC_DIR}/freetype/bdf/bdf.c
-		${CINDER_SRC_DIR}/freetype/cff/cff.c
-		${CINDER_SRC_DIR}/freetype/pcf/pcf.c
-		${CINDER_SRC_DIR}/freetype/pfr/pfr.c
-		${CINDER_SRC_DIR}/freetype/sfnt/sfnt.c
-		${CINDER_SRC_DIR}/freetype/truetype/truetype.c
-		${CINDER_SRC_DIR}/freetype/type1/type1.c
-		${CINDER_SRC_DIR}/freetype/type42/type42.c
-		${CINDER_SRC_DIR}/freetype/winfonts/winfnt.c
-		${CINDER_SRC_DIR}/freetype/base/ftbase.c
-		${CINDER_SRC_DIR}/freetype/base/ftbbox.c
-		${CINDER_SRC_DIR}/freetype/base/ftbdf.c
-		${CINDER_SRC_DIR}/freetype/base/ftbitmap.c
-		${CINDER_SRC_DIR}/freetype/base/ftcid.c
-		${CINDER_SRC_DIR}/freetype/base/ftdebug.c
-		${CINDER_SRC_DIR}/freetype/base/ftfstype.c
-		${CINDER_SRC_DIR}/freetype/base/ftgasp.c
-		${CINDER_SRC_DIR}/freetype/base/ftglyph.c
-		${CINDER_SRC_DIR}/freetype/base/ftgxval.c
-		${CINDER_SRC_DIR}/freetype/base/ftinit.c
-		${CINDER_SRC_DIR}/freetype/base/ftmm.c
-		${CINDER_SRC_DIR}/freetype/base/ftotval.c
-		${CINDER_SRC_DIR}/freetype/base/ftpatent.c
-		${CINDER_SRC_DIR}/freetype/base/ftpfr.c
-		${CINDER_SRC_DIR}/freetype/base/ftstroke.c
-		${CINDER_SRC_DIR}/freetype/base/ftsynth.c
-		${CINDER_SRC_DIR}/freetype/base/ftsystem.c
-		${CINDER_SRC_DIR}/freetype/base/fttype1.c
-		${CINDER_SRC_DIR}/freetype/base/ftwinfnt.c
-		${CINDER_SRC_DIR}/freetype/raster/raster.c
-		${CINDER_SRC_DIR}/freetype/smooth/smooth.c
-		${CINDER_SRC_DIR}/freetype/autofit/autofit.c
-		${CINDER_SRC_DIR}/freetype/bzip2/ftbzip2.c
-		${CINDER_SRC_DIR}/freetype/cache/ftcache.c
-		${CINDER_SRC_DIR}/freetype/gzip/ftgzip.c
-		${CINDER_SRC_DIR}/freetype/lzw/ftlzw.c
-		${CINDER_SRC_DIR}/freetype/gxvalid/gxvalid.c
-		${CINDER_SRC_DIR}/freetype/otvalid/otvalid.c
-		${CINDER_SRC_DIR}/freetype/psaux/psaux.c
-		${CINDER_SRC_DIR}/freetype/pshinter/pshinter.c
-		${CINDER_SRC_DIR}/freetype/psnames/psnames.c
-		${CINDER_SRC_DIR}/freetype/cid/type1cid.c
-		${CINDER_SRC_DIR}/freetype/bdf/bdflib.c
+		${CINDER_PATH}/include/freetype/src/bdf/bdf.c
+		${CINDER_PATH}/include/freetype/src/cff/cff.c
+		${CINDER_PATH}/include/freetype/src/pcf/pcf.c
+		${CINDER_PATH}/include/freetype/src/pfr/pfr.c
+		${CINDER_PATH}/include/freetype/src/sfnt/sfnt.c
+		${CINDER_PATH}/include/freetype/src/truetype/truetype.c
+		${CINDER_PATH}/include/freetype/src/type1/type1.c
+		${CINDER_PATH}/include/freetype/src/type42/type42.c
+		${CINDER_PATH}/include/freetype/src/winfonts/winfnt.c
+		${CINDER_PATH}/include/freetype/src/base/ftbase.c
+		${CINDER_PATH}/include/freetype/src/base/ftbbox.c
+		${CINDER_PATH}/include/freetype/src/base/ftbdf.c
+		${CINDER_PATH}/include/freetype/src/base/ftbitmap.c
+		${CINDER_PATH}/include/freetype/src/base/ftcid.c
+		${CINDER_PATH}/include/freetype/src/base/ftdebug.c
+		${CINDER_PATH}/include/freetype/src/base/ftfstype.c
+		${CINDER_PATH}/include/freetype/src/base/ftgasp.c
+		${CINDER_PATH}/include/freetype/src/base/ftglyph.c
+		${CINDER_PATH}/include/freetype/src/base/ftgxval.c
+		${CINDER_PATH}/include/freetype/src/base/ftinit.c
+		${CINDER_PATH}/include/freetype/src/base/ftmm.c
+		${CINDER_PATH}/include/freetype/src/base/ftotval.c
+		${CINDER_PATH}/include/freetype/src/base/ftpatent.c
+		${CINDER_PATH}/include/freetype/src/base/ftpfr.c
+		${CINDER_PATH}/include/freetype/src/base/ftstroke.c
+		${CINDER_PATH}/include/freetype/src/base/ftsynth.c
+		${CINDER_PATH}/include/freetype/src/base/ftsystem.c
+		${CINDER_PATH}/include/freetype/src/base/fttype1.c
+		${CINDER_PATH}/include/freetype/src/base/ftwinfnt.c
+		${CINDER_PATH}/include/freetype/src/raster/raster.c
+		${CINDER_PATH}/include/freetype/src/smooth/smooth.c
+		${CINDER_PATH}/include/freetype/src/autofit/autofit.c
+		${CINDER_PATH}/include/freetype/src/bzip2/ftbzip2.c
+		${CINDER_PATH}/include/freetype/src/cache/ftcache.c
+		${CINDER_PATH}/include/freetype/src/gzip/ftgzip.c
+		${CINDER_PATH}/include/freetype/src/lzw/ftlzw.c
+		${CINDER_PATH}/include/freetype/src/gxvalid/gxvalid.c
+		${CINDER_PATH}/include/freetype/src/otvalid/otvalid.c
+		${CINDER_PATH}/include/freetype/src/psaux/psaux.c
+		${CINDER_PATH}/include/freetype/src/pshinter/pshinter.c
+		${CINDER_PATH}/include/freetype/src/psnames/psnames.c
+		${CINDER_PATH}/include/freetype/src/cid/type1cid.c
+		${CINDER_PATH}/include/freetype/src/bdf/bdflib.c
 	)
 
 	list( APPEND CINDER_SRC_FILES               ${SRC_SET_FREETYPE}	)
@@ -415,22 +423,26 @@ if( NOT CINDER_FREETYPE_USE_SYSTEM )
 
 endif() # ! CINDER_FREETYPE_USE_SYSTEM
 
+# ----------------------------------------------------------------------------------------------------------------------
+# zlib
+# ----------------------------------------------------------------------------------------------------------------------
+
 list( APPEND SRC_SET_ZLIB
-	${CINDER_SRC_DIR}/zlib/adler32.c
-	${CINDER_SRC_DIR}/zlib/compress.c
-	${CINDER_SRC_DIR}/zlib/crc32.c
-	${CINDER_SRC_DIR}/zlib/deflate.c
-	${CINDER_SRC_DIR}/zlib/gzclose.c
-	${CINDER_SRC_DIR}/zlib/gzlib.c
-	${CINDER_SRC_DIR}/zlib/gzread.c
-	${CINDER_SRC_DIR}/zlib/gzwrite.c
-	${CINDER_SRC_DIR}/zlib/infback.c
-	${CINDER_SRC_DIR}/zlib/inffast.c
-	${CINDER_SRC_DIR}/zlib/inflate.c
-	${CINDER_SRC_DIR}/zlib/inftrees.c
-	${CINDER_SRC_DIR}/zlib/trees.c
-	${CINDER_SRC_DIR}/zlib/uncompr.c
-	${CINDER_SRC_DIR}/zlib/zutil.c
+	${CINDER_PATH}/include/zlib/adler32.c
+	${CINDER_PATH}/include/zlib/compress.c
+	${CINDER_PATH}/include/zlib/crc32.c
+	${CINDER_PATH}/include/zlib/deflate.c
+	${CINDER_PATH}/include/zlib/gzclose.c
+	${CINDER_PATH}/include/zlib/gzlib.c
+	${CINDER_PATH}/include/zlib/gzread.c
+	${CINDER_PATH}/include/zlib/gzwrite.c
+	${CINDER_PATH}/include/zlib/infback.c
+	${CINDER_PATH}/include/zlib/inffast.c
+	${CINDER_PATH}/include/zlib/inflate.c
+	${CINDER_PATH}/include/zlib/inftrees.c
+	${CINDER_PATH}/include/zlib/trees.c
+	${CINDER_PATH}/include/zlib/uncompr.c
+	${CINDER_PATH}/include/zlib/zutil.c
 )
 
 list( APPEND CINDER_SRC_FILES           ${SRC_SET_ZLIB}	)

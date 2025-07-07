@@ -534,6 +534,7 @@ set( CINDER_C_SRC_FILES
 
 set( CINDER_CXX_SRC_FILES
     ${CINDER_SRC_DIR}/glad/glad_es.c
+    ${CINDER_SRC_DIR}/glad/glad_egl.c
 
     ${CINDER_SRC_DIR}/cinder/android/libc_helper.cpp
     ${CINDER_SRC_DIR}/cinder/android/AndroidDevLog.cpp

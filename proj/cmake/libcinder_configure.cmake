@@ -30,18 +30,8 @@ list( APPEND CINDER_INCLUDE_USER_PRIVATE
 	${CINDER_SRC_DIR}/r8brain
 )
 
-# *_PRIVATE includes for imgui taking into account a potential custom path
-if( CINDER_IMGUI_DIR )
-	list( APPEND CINDER_INCLUDE_USER_PRIVATE 
-		${CINDER_IMGUI_DIR}
-		${CINDER_IMGUI_DIR}/backends
-		${CINDER_IMGUI_DIR}/misc/freetype
-		${CINDER_IMGUI_DIR}/misc/cpp
-	)
-	list( APPEND CINDER_DEFINES "CINDER_IMGUI_EXTERNAL" )
-else()
-	list( APPEND CINDER_INCLUDE_USER_PRIVATE ${CINDER_INC_DIR}/imgui )
-endif()
+# Include submodules configuration
+include( ${CINDER_CMAKE_DIR}/submodules.cmake )
 
 if( CINDER_HEADLESS_GL_EGL )
 	list( APPEND CINDER_INCLUDE_USER_PRIVATE ${CINDER_INC_DIR}/EGL-Registry )
