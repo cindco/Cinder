@@ -30,3 +30,7 @@
 	path = include/zlib
 	url = https://github.com/madler/zlib.git
 	branch = master
+[submodule "include/freetype"]
+	path = include/freetype
+	url = https://github.com/freetype/freetype.git
+	branch = master
