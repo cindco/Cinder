@@ -230,10 +230,15 @@ if( NOT CINDER_GL_ES )
 
 list( APPEND SRC_SET_GLAD
     ${CINDER_SRC_DIR}/glad/glad.c
-    ${CINDER_SRC_DIR}/glad/glad_wgl.c
-    ${CINDER_SRC_DIR}/glad/glad_glx.c
-    ${CINDER_SRC_DIR}/glad/glad_egl.c
 )
+
+if( MSVC )
+    list( APPEND SRC_SET_GLAD ${CINDER_SRC_DIR}/glad/glad_wgl.c )
+elseif( CMAKE_SYSTEM_NAME STREQUAL "Linux" )
+    list( APPEND SRC_SET_GLAD ${CINDER_SRC_DIR}/glad/glad_glx.c )
+elseif( ANDROID )
+    list( APPEND SRC_SET_GLAD ${CINDER_SRC_DIR}/glad/glad_egl.c )
+endif()
 
 list( APPEND CINDER_SRC_FILES               ${SRC_SET_GLAD} )
 source_group( "thirdparty\\glad" FILES      ${SRC_SET_GLAD} )
