@@ -3,6 +3,7 @@
 #include "cinder/Surface.h"
 #include "cinder/ConcurrentCircularBuffer.h"
 #include "cinder/Thread.h"
+#include "cinder/Json.h"
 
 #include <string>
 
