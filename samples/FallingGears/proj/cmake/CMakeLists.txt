@@ -14,4 +14,5 @@ ci_make_app(
 	SOURCES     ${SRC_FILES}
 	CINDER_PATH ${CINDER_PATH}
 	INCLUDES    ${APP_PATH}/include
+	BLOCKS      Box2D
 )

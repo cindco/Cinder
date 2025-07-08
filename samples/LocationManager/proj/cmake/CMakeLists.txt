@@ -11,7 +11,9 @@ include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 file(GLOB SRC_FILES "${APP_PATH}/src/*.cpp")
 
 ci_make_app(
+	APP_NAME    "LocationManagerApp"
 	SOURCES     ${SRC_FILES}
 	CINDER_PATH ${CINDER_PATH}
 	INCLUDES    ${APP_PATH}/include
+	BLOCKS      LocationManager
 )
