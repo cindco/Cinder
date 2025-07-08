@@ -1,6 +1,21 @@
 cmake_minimum_required( VERSION 3.10 FATAL_ERROR )
 set( CMAKE_VERBOSE_MAKEFILE ON )
 
+if(WIN32)
+    string(SUBSTRING "${CMAKE_SOURCE_DIR}" 0 1 drive_letter)
+    execute_process(
+        COMMAND powershell -Command "(Get-Volume -DriveLetter ${drive_letter}).FileSystem"
+        OUTPUT_VARIABLE fsinfo
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+    string(FIND "${fsinfo}" "exFAT" exfat_found)
+    if(NOT exfat_found EQUAL -1)
+        message(WARNING "exFAT filesystem detected. Assets will be copied instead of symlinked.")
+        set(CINDER_COPY_ASSETS ON CACHE BOOL "Copy assets instead of symlinking on exFAT" FORCE)
+    endif()
+endif()
+
 # Configure the Android toolchain before the project start
 if( CINDER_TARGET )
 	string( TOLOWER "${CINDER_TARGET}" CINDER_TARGET_LOWER )
