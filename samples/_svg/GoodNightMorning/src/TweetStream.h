@@ -4,6 +4,7 @@
 #include "cinder/ConcurrentCircularBuffer.h"
 #include "cinder/Thread.h"
 #include "cinder/Json.h"
+#include "cinder/JsonTree.h"
 
 #include <string>
 
