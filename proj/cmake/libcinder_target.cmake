@@ -18,7 +18,7 @@ target_include_directories( cinder BEFORE INTERFACE ${CINDER_INCLUDE_USER_INTERF
 target_include_directories( cinder SYSTEM BEFORE INTERFACE ${CINDER_INCLUDE_SYSTEM_INTERFACE} )
 
 target_include_directories( cinder BEFORE PRIVATE ${CINDER_INCLUDE_USER_PRIVATE} )
-target_include_directories( cinder SYSTEM BEFORE PRIVATE ${CINDER_INCLUDE_SYSTEM_PRIVATE} )
+target_include_directories( cinder SYSTEM BEFORE PUBLIC ${CINDER_INCLUDE_SYSTEM_PRIVATE} )
 
 target_link_libraries( cinder PUBLIC ${CINDER_LIBS_DEPENDS}  )
 
