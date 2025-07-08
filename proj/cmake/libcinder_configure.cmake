@@ -56,18 +56,24 @@ if( PNG_FOUND )
 endif()
 
 if( CINDER_FREETYPE_USE_SYSTEM )
-	#	TODO: finish this, not sure what to do about library linking
-	#	find_package( Freetype2 REQUIRED )
-	#	list( APPEND CINDER_INCLUDE_SYSTEM_PRIVATE  ${FREETYPE2_INCLUDE_DIRS} )
-	#	list( APPEND CINDER_LIBS_DEPENDS 	${FREETYPE2_LIBRARIES} )
-else()
-	# use freetype copy that ships with cinder
-	ci_log_v( "using freetype copy that ships with cinder" )
-	list( APPEND CINDER_INCLUDE_SYSTEM_PRIVATE
-		${CINDER_INC_DIR}/freetype
-	)
-	list( APPEND CINDER_DEFINES "-DFT2_BUILD_LIBRARY;-DFT_DEBUG_LEVEL_TRACE" )
+	# Use system-installed FreeType library
+	# TODO: Implement system FreeType detection and linking
+	# find_package( Freetype2 REQUIRED )
+	# list( APPEND CINDER_INCLUDE_SYSTEM_PRIVATE ${FREETYPE2_INCLUDE_DIRS} )
+	# list( APPEND CINDER_LIBS_DEPENDS ${FREETYPE2_LIBRARIES} )
+	message( WARNING "CINDER_FREETYPE_USE_SYSTEM is not yet implemented. Using bundled FreeType submodule." )
+	# Fall through to bundled FreeType
 endif()
+
+# Use FreeType from Git submodule (default behavior)
+ci_log_v( "Using FreeType from Git submodule" )
+list( APPEND CINDER_INCLUDE_SYSTEM_PRIVATE
+	${CINDER_INC_DIR}/freetype
+)
+list( APPEND CINDER_INCLUDE_USER_PRIVATE
+	${CINDER_INC_DIR}/freetype
+)
+list( APPEND CINDER_DEFINES "-DFT2_BUILD_LIBRARY;-DFT_DEBUG_LEVEL_TRACE" )
 
 # declare whether AntTweakBar is available (isn't on mobile devices)
 if( CINDER_GL_ES OR CINDER_DISABLE_ANTTWEAKBAR )

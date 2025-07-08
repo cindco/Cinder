@@ -373,15 +373,7 @@ endif()
 
 if( NOT CINDER_FREETYPE_USE_SYSTEM )
 	list( APPEND SRC_SET_FREETYPE
-		${CINDER_PATH}/include/freetype/src/bdf/bdf.c
-		${CINDER_PATH}/include/freetype/src/cff/cff.c
-		${CINDER_PATH}/include/freetype/src/pcf/pcf.c
-		${CINDER_PATH}/include/freetype/src/pfr/pfr.c
-		${CINDER_PATH}/include/freetype/src/sfnt/sfnt.c
-		${CINDER_PATH}/include/freetype/src/truetype/truetype.c
-		${CINDER_PATH}/include/freetype/src/type1/type1.c
-		${CINDER_PATH}/include/freetype/src/type42/type42.c
-		${CINDER_PATH}/include/freetype/src/winfonts/winfnt.c
+		${CINDER_PATH}/include/freetype/src/autofit/autofit.c
 		${CINDER_PATH}/include/freetype/src/base/ftbase.c
 		${CINDER_PATH}/include/freetype/src/base/ftbbox.c
 		${CINDER_PATH}/include/freetype/src/base/ftbdf.c
@@ -399,24 +391,42 @@ if( NOT CINDER_FREETYPE_USE_SYSTEM )
 		${CINDER_PATH}/include/freetype/src/base/ftpfr.c
 		${CINDER_PATH}/include/freetype/src/base/ftstroke.c
 		${CINDER_PATH}/include/freetype/src/base/ftsynth.c
-		${CINDER_PATH}/include/freetype/src/base/ftsystem.c
 		${CINDER_PATH}/include/freetype/src/base/fttype1.c
 		${CINDER_PATH}/include/freetype/src/base/ftwinfnt.c
-		${CINDER_PATH}/include/freetype/src/raster/raster.c
-		${CINDER_PATH}/include/freetype/src/smooth/smooth.c
-		${CINDER_PATH}/include/freetype/src/autofit/autofit.c
+		${CINDER_PATH}/include/freetype/src/bdf/bdf.c
+		${CINDER_PATH}/include/freetype/src/bdf/bdflib.c
 		${CINDER_PATH}/include/freetype/src/bzip2/ftbzip2.c
 		${CINDER_PATH}/include/freetype/src/cache/ftcache.c
+		${CINDER_PATH}/include/freetype/src/cff/cff.c
+		${CINDER_PATH}/include/freetype/src/cid/type1cid.c
 		${CINDER_PATH}/include/freetype/src/gzip/ftgzip.c
-		${CINDER_PATH}/include/freetype/src/lzw/ftlzw.c
 		${CINDER_PATH}/include/freetype/src/gxvalid/gxvalid.c
+		${CINDER_PATH}/include/freetype/src/lzw/ftlzw.c
 		${CINDER_PATH}/include/freetype/src/otvalid/otvalid.c
+		${CINDER_PATH}/include/freetype/src/pcf/pcf.c
+		${CINDER_PATH}/include/freetype/src/pfr/pfr.c
 		${CINDER_PATH}/include/freetype/src/psaux/psaux.c
 		${CINDER_PATH}/include/freetype/src/pshinter/pshinter.c
 		${CINDER_PATH}/include/freetype/src/psnames/psnames.c
-		${CINDER_PATH}/include/freetype/src/cid/type1cid.c
-		${CINDER_PATH}/include/freetype/src/bdf/bdflib.c
+		${CINDER_PATH}/include/freetype/src/raster/raster.c
+		${CINDER_PATH}/include/freetype/src/sdf/sdf.c
+		${CINDER_PATH}/include/freetype/src/sfnt/sfnt.c
+		${CINDER_PATH}/include/freetype/src/smooth/smooth.c
+		${CINDER_PATH}/include/freetype/src/svg/svg.c
+		${CINDER_PATH}/include/freetype/src/truetype/truetype.c
+		${CINDER_PATH}/include/freetype/src/type1/type1.c
+		${CINDER_PATH}/include/freetype/src/type42/type42.c
+		${CINDER_PATH}/include/freetype/src/winfonts/winfnt.c
 	)
+
+	# Platform-specific ftsystem.c
+	if( CINDER_MSW )
+		list( APPEND SRC_SET_FREETYPE ${CINDER_PATH}/include/freetype/builds/windows/ftsystem.c )
+	elseif( CINDER_LINUX OR CINDER_MAC )
+		list( APPEND SRC_SET_FREETYPE ${CINDER_PATH}/include/freetype/builds/unix/ftsystem.c )
+	else()
+		list( APPEND SRC_SET_FREETYPE ${CINDER_PATH}/include/freetype/src/base/ftsystem.c )
+	endif()
 
 	list( APPEND CINDER_SRC_FILES               ${SRC_SET_FREETYPE}	)
 	source_group( "thirdparty\\freetype" FILES  ${SRC_SET_FREETYPE} )
