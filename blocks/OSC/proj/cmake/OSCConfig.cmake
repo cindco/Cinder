@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/config.cmake")
+
 if( NOT TARGET OSC )
 	get_filename_component( OSC_SOURCE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../src" ABSOLUTE )
 	get_filename_component( CINDER_PATH "${CMAKE_CURRENT_LIST_DIR}/../../../.." ABSOLUTE )

@@ -14,8 +14,8 @@ set( SRC_FILES
 )
 
 ci_make_app(
-	SOURCES     ${SRC_FILES}
-	INCLUDES    ${APP_PATH}/include
+	SOURCES     ${APP_PATH}/src/TextInputTweenApp.cpp
 	CINDER_PATH ${CINDER_PATH}
+	INCLUDES    ${APP_PATH}/include
 	RESOURCES   ${APP_PATH}/resources/Alfphabet-IV.ttf
 )
