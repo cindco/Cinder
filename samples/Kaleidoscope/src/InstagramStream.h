@@ -1,6 +1,6 @@
 #pragma once
 
-#include "cinder/Json.h"
+#include <nlohmann/json.hpp>
 #include <string>
 #include <memory>
 #include <thread>
@@ -41,4 +41,4 @@ protected:
     bool mIsConnected = false;
 };
 
-ci::JsonTree queryInstagram(const std::string &searchUrl); 
+nlohmann::json queryInstagram(const std::string &searchUrl); 

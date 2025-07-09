@@ -14,6 +14,7 @@
 #include "cinder/ImageIo.h"
 #include "cinder/Surface.h"
 #include "cinder/Log.h"
+#include <nlohmann/json.hpp>
 
 #include "InstagramStream.h"
 
@@ -25,7 +26,14 @@ using namespace ci::app;
 
 static const string INSTAGRAM_API_URL = "https://api.instagram.com/v1";
 
-JsonTree queryInstagram( const std::string &query );
+nlohmann::json queryInstagram(const std::string &searchUrl)
+{
+    Url url(searchUrl, true);
+    auto data = loadUrl(url);
+    std::stringstream buffer;
+    buffer << data->stream()->rdbuf();
+    return nlohmann::json::parse(buffer.str());
+}
 
 
 InstagramStream::InstagramStream(const string &clientId )
@@ -108,75 +116,48 @@ InstagramStream::~InstagramStream()
 
 
 // Function the background thread lives in
-void InstagramStream::serviceGrams(string url)
+void InstagramStream::serviceGrams(std::string url)
 {
-	ThreadSetup threadSetup;
-	std::string nextQueryString = url;
-	
-	JsonTree searchResults;
-	JsonTree::ConstIter resultIt = searchResults.end();
-	
-	// This function loops until the app quits. Each iteration a pulls out the next result from the Twitter API query.
-	// When it reaches the last result of the current query it issues a new one, based on the "refresh_url" property
-	// of the current query.
-	// The loop doesn't spin (max out the processor) because ConcurrentCircularBuffer.pushFront() non-busy-waits for a new
-	// slot in the circular buffer to become available.
-	JsonTree queryResult;
-	while( ! mCanceled ) {
-		if( resultIt == searchResults.end() ) {			// are we at the end of the results of this JSON query?
-			// issue a new query
-			try {
-				queryResult = queryInstagram( nextQueryString );
-				// the next query will be the "refresh_url" of this one.
-				
-				try {
-					nextQueryString = queryResult["pagination"].getChild("next_url").getValue();
-				}
-				catch( ci::Exception &exc ) {
-					// ignoring pagination exception..
-				}
-				
-				searchResults = queryResult.getChild("data");
-				resultIt = searchResults.begin();
-				mIsConnected = true;
-			}
-			catch( ci::Exception &exc ) {				
-				CI_LOG_W( "exception caught, what: " << exc.what() );
-				console() << queryResult << endl;
-				console() << nextQueryString << endl;
-				
-				// check if it's a 420 error
-				if(queryResult.getChild("meta").getChild("code").getValue() == "420"){
-					console() << "420 error" << endl;
-					mIsConnected = false;
-				}
-				
-				ci::sleep( 1000 ); // try again in 1 second
-			}
-		}
-		if( resultIt != searchResults.end() ) {
-			try {
-				
-				string userName = (*resultIt)["user"]["username"].getValue();
-				
-				// get the URL and load this instagram image
-				string imageUrl = (*resultIt)["images"]["standard_resolution"]["url"].getValue();
-				Surface image( loadImage( loadUrl( imageUrl ) ) );
-				// string imageUrl = "http://distilleryimage5.s3.amazonaws.com/1dd174cca14611e1af7612313813f8e8_7.jpg"; // Test image
-				mBuffer.pushFront( Instagram( userName, imageUrl, image ) );
-			}
-			catch( ci::Exception &exc ) {
-				CI_LOG_W( "exception caught, what: " << exc.what() );
-			}
-			++resultIt;
-		}
-	}
-}
+    ThreadSetup threadSetup;
+    std::string nextQueryString = url;
 
-JsonTree queryInstagram( const std::string &searchUrl )
-{
-	Url url(searchUrl , true );
-	return JsonTree( loadUrl( url ) );
+    nlohmann::json searchResults;
+    nlohmann::json::iterator resultIt = searchResults.end();
+    nlohmann::json queryResult;
+    while (!mCanceled) {
+        if (resultIt == searchResults.end()) {
+            try {
+                queryResult = queryInstagram(nextQueryString);
+                // the next query will be the "next_url" of this one.
+                if (queryResult.contains("pagination") && queryResult["pagination"].contains("next_url"))
+                    nextQueryString = queryResult["pagination"]["next_url"].get<std::string>();
+                searchResults = queryResult["data"];
+                resultIt = searchResults.begin();
+                mIsConnected = true;
+            }
+            catch (const std::exception &exc) {
+                CI_LOG_W("exception caught, what: " << exc.what());
+                // Optionally log queryResult and nextQueryString
+                if (queryResult.contains("meta") && queryResult["meta"].contains("code") && queryResult["meta"]["code"].get<std::string>() == "420") {
+                    console() << "420 error" << std::endl;
+                    mIsConnected = false;
+                }
+                ci::sleep(1000); // try again in 1 second
+            }
+        }
+        if (resultIt != searchResults.end()) {
+            try {
+                std::string userName = (*resultIt)["user"]["username"].get<std::string>();
+                std::string imageUrl = (*resultIt)["images"]["standard_resolution"]["url"].get<std::string>();
+                Surface image(loadImage(loadUrl(imageUrl)));
+                mBuffer.pushFront(Instagram(userName, imageUrl, image));
+            }
+            catch (const std::exception &exc) {
+                CI_LOG_W("exception caught, what: " << exc.what());
+            }
+            ++resultIt;
+        }
+    }
 }
 
 bool InstagramStream::hasInstagramAvailable()

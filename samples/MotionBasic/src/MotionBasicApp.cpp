@@ -6,6 +6,7 @@
 #include "cinder/MotionManager.h"
 #endif
 #include "cinder/Log.h"
+#include "cinder/gl/gl.h"
 
 using namespace ci;
 using namespace ci::app;
