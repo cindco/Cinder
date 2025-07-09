@@ -59,6 +59,12 @@ endif()
 
 include( ${CINDER_CMAKE_DIR}/libcinder_target.cmake )
 
+# Add Cinder blocks as subdirectories so their targets are always available
+add_subdirectory(blocks/Cairo/proj/cmake)
+add_subdirectory(blocks/MotionManager/proj/cmake)
+add_subdirectory(blocks/LocationManager/proj/cmake)
+add_subdirectory(blocks/Clipper/proj/cmake)
+
 if( CINDER_BUILD_ALL_SAMPLES )
 	include( ${CINDER_CMAKE_DIR}/modules/findCMakeDirs.cmake )
 
