@@ -6,7 +6,6 @@
 //	Copyright (c) 2012 The Barbarian Group. All rights reserved.
 //
 
-
 #pragma once
 
 #include "cinder/app/App.h"
@@ -14,7 +13,7 @@
 #include "cinder/ConcurrentCircularBuffer.h"
 #include "cinder/Thread.h"
 #include <string>
-
+#include <memory>
 
 class Instagram {
   public:
@@ -32,8 +31,6 @@ class Instagram {
 	std::string		mUser, mImageUrl;
 	ci::Surface		mImage;
 };
-
-
 
 class InstagramStream {
   public:
@@ -54,10 +51,24 @@ class InstagramStream {
 	bool		hasInstagramAvailable();
 	Instagram	getNextInstagram();
 	bool		isConnected();
+	bool		isDemoMode();
+	
+	// OAuth Authentication methods
+	static std::string getAuthUrl(const std::string& clientId, const std::string& redirectUri);
+	static std::string exchangeCodeForToken(const std::string& clientId, const std::string& clientSecret, 
+										   const std::string& code, const std::string& redirectUri);
+	static std::string refreshAccessToken(const std::string& clientId, const std::string& clientSecret, 
+										const std::string& refreshToken);
+	static bool saveAccessToken(const std::string& accessToken, const std::string& refreshToken = "");
+	static std::string loadAccessToken();
+	static std::string loadRefreshToken();
+	static void clearStoredTokens();
 	
   protected:
 	void		startThread( std::string url );
+	void		startDemoThread();
 	void		serviceGrams( std::string url );
+	void		serviceDemoGrams();
 	
 	std::string								mSearchPhrase;
 	std::shared_ptr<std::thread>			mThread;
@@ -65,4 +76,5 @@ class InstagramStream {
 	bool									mCanceled;
 	bool									mIsConnected;
 	std::string								mClientId;
-};
+	bool									mDemoMode;
+}; 

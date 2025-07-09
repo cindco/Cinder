@@ -18,10 +18,10 @@ static const int MIRROR_DUR = 5;	// Duration of the mirror/kaleidoscope animatio
 static const int STILL_DUR = 5;		// Duration of the still image
 static const string TAG = "";		// Instagram tag to search for
 
-// Instagram Client Id - DO NOT USE THIS ONE!!! 
-// Replace with your own client ID after registering your
-// instagram application here http://instagram.com/developer/register/
-static const string CLIENT_ID = "def20410b5134f7d9b828668775aee4a";	 
+// Instagram Client Id - Use "demo" for demo mode or your own access token
+// Note: Instagram Basic Display API requires user authentication and OAuth flow
+// For production use, you'd need to implement proper OAuth authentication
+static const string CLIENT_ID = "demo";	 
 
 static const bool PREMULT = false;
 
@@ -84,6 +84,13 @@ void InstascopeApp::setup()
 	mPhaseChangeCalled = false;
 	
 	mTextRibbon = new TextRibbon();
+	
+	// Check if we're in demo mode
+	if (CLIENT_ID == "demo" || CLIENT_ID.empty()) {
+		console() << "Running in DEMO MODE - using random images from Lorem Picsum" << std::endl;
+		console() << "To use real Instagram API, set CLIENT_ID to your access token" << std::endl;
+		console() << "Note: Instagram Basic Display API requires OAuth authentication" << std::endl;
+	}
 	
 	// Popular images stream
 	mInstaStream = make_shared<InstagramStream>( CLIENT_ID );
