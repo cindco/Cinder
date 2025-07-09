@@ -9,6 +9,7 @@ target_include_directories(Cairo PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}/../../../Cairo/include
     ${CMAKE_CURRENT_LIST_DIR}/../../../../include
     ${CMAKE_CURRENT_LIST_DIR}/../../../Cairo/include/cinder
+    ${CMAKE_SOURCE_DIR}/include/freetype/include
 )
 
 # Platform-specific configuration
