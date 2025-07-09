@@ -1,3 +1,5 @@
+include("${CMAKE_CURRENT_LIST_DIR}/config.cmake")
+
 if( NOT TARGET TUIO )
 	get_filename_component( TUIO_SOURCE_PATH "${CMAKE_CURRENT_LIST_DIR}/../../src" ABSOLUTE )
 

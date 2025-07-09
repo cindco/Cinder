@@ -8,6 +8,7 @@
 
 #include "TrianglePiece.h"
 #include "InstagramStream.h"
+#include "InstagramOAuth.h"
 #include "TextRibbon.h"
 
 using namespace ci;

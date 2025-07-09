@@ -8,14 +8,11 @@ get_filename_component( APP_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../" ABSOLUTE )
 
 include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 
-set( SRC_FILES
-	${APP_PATH}/src/TextInputTweenApp.cpp
-	${APP_PATH}/src/Character.cpp
-)
+file(GLOB SRC_FILES "${APP_PATH}/src/*.cpp")
 
 ci_make_app(
 	SOURCES     ${SRC_FILES}
-	INCLUDES    ${APP_PATH}/include
 	CINDER_PATH ${CINDER_PATH}
+	INCLUDES    ${APP_PATH}/include
 	RESOURCES   ${APP_PATH}/resources/Alfphabet-IV.ttf
 )

@@ -6,6 +6,8 @@
 //	Copyright (c) 2012 The Barbarian Group. All rights reserved.
 //
 
+#include "InstagramStream.h"
+#include "InstagramOAuth.h"
 #include "cinder/app/App.h"
 #include "cinder/Rand.h"
 #include "cinder/Thread.h"
@@ -14,184 +16,203 @@
 #include "cinder/ImageIo.h"
 #include "cinder/Surface.h"
 #include "cinder/Log.h"
-
-#include "InstagramStream.h"
+#include "cinder/Utilities.h"
+#include <nlohmann/json.hpp>
+#include <memory>
+#include <vector>
+#include <string>
+#include <thread>
+#include <sstream>
 
 static const int BUFFER_SIZE = 10;
+static const std::string INSTAGRAM_API_URL = "https://graph.instagram.com/v12.0";
+static const std::vector<std::string> DEMO_IMAGES = {
+    "https://picsum.photos/600/600?random=1",
+    "https://picsum.photos/600/600?random=2", 
+    "https://picsum.photos/600/600?random=3",
+    "https://picsum.photos/600/600?random=4",
+    "https://picsum.photos/600/600?random=5",
+    "https://picsum.photos/600/600?random=6",
+    "https://picsum.photos/600/600?random=7",
+    "https://picsum.photos/600/600?random=8",
+    "https://picsum.photos/600/600?random=9",
+    "https://picsum.photos/600/600?random=10"
+};
+static const std::vector<std::string> DEMO_USERS = {
+    "demo_user_1", "demo_user_2", "demo_user_3", "demo_user_4", "demo_user_5",
+    "demo_user_6", "demo_user_7", "demo_user_8", "demo_user_9", "demo_user_10"
+};
 
-using namespace std;
-using namespace ci;
-using namespace ci::app;
-
-static const string INSTAGRAM_API_URL = "https://api.instagram.com/v1";
-
-JsonTree queryInstagram( const std::string &query );
-
-
-InstagramStream::InstagramStream(const string &clientId )
-: mBuffer( BUFFER_SIZE ), // our buffer of instagrams can hold up to 10
-mCanceled( false ),
-mClientId( clientId )
+nlohmann::json queryInstagram(const std::string& searchUrl)
 {
-	startThread(INSTAGRAM_API_URL + "/media/popular?client_id="+ mClientId);
+    ci::Url url(searchUrl, true);
+    auto data = ci::loadUrl(url);
+    std::stringstream buffer;
+    buffer << data->getBuffer()->getData();
+    return nlohmann::json::parse(buffer.str());
 }
 
-InstagramStream::InstagramStream( const std::string &searchPhrase, const string &clientId )
-: mBuffer( BUFFER_SIZE ), // our buffer of instagrams can hold up to 10
-mCanceled( false ),
-mSearchPhrase( searchPhrase ),
-mClientId( clientId )
+InstagramStream::InstagramStream(const std::string& clientId)
+: mBuffer(BUFFER_SIZE), mCanceled(false), mSearchPhrase(""), mThread(nullptr), mIsConnected(false), mClientId(clientId), mDemoMode(clientId.empty() || clientId == "demo")
 {
-	startThread(INSTAGRAM_API_URL + "/tags/" + Url::encode( mSearchPhrase ) + "/media/recent?client_id="+ mClientId);
+    std::string accessToken = InstagramOAuth::loadAccessToken();
+    if (!accessToken.empty()) {
+        mClientId = accessToken;
+        mDemoMode = false;
+        ci::app::console() << "Using stored Instagram access token" << std::endl;
+    }
+    if (mDemoMode) {
+        startDemoThread();
+    } else {
+        startThread(INSTAGRAM_API_URL + "/me/media?fields=id,media_type,media_url,thumbnail_url,username&access_token=" + mClientId);
+    }
 }
 
-InstagramStream::InstagramStream(const std::string &searchPhrase, const int &minId, const int &maxId, const std::string &clientId )
-: mBuffer( BUFFER_SIZE ), // our buffer of instagrams can hold up to 10
-mCanceled( false ),
-mSearchPhrase( searchPhrase ),
-mClientId( clientId )
+InstagramStream::InstagramStream(const std::string& searchPhrase, const std::string& clientId)
+: mBuffer(BUFFER_SIZE), mCanceled(false), mSearchPhrase(searchPhrase), mThread(nullptr), mIsConnected(false), mClientId(clientId), mDemoMode(clientId.empty() || clientId == "demo")
 {
-	startThread(INSTAGRAM_API_URL + "/tags/" + Url::encode( mSearchPhrase ) + "/media/recent?client_id="+ mClientId + "&min_id=" + toString(minId) + "&max_id=" + toString(maxId));
+    if (mDemoMode) {
+        startDemoThread();
+    } else {
+        startDemoThread();
+    }
 }
 
-
-InstagramStream::InstagramStream(ci::vec2 loc, float dist, int minTs, int maxTs, std::string clientId )
-: mBuffer( BUFFER_SIZE ), // our buffer of instagrams can hold up to 10
-mCanceled( false ),
-mClientId( clientId )
+InstagramStream::InstagramStream(const std::string& searchPhrase, const int& minId, const int& maxId, const std::string& clientId)
+: mBuffer(BUFFER_SIZE), mCanceled(false), mSearchPhrase(searchPhrase), mThread(nullptr), mIsConnected(false), mClientId(clientId), mDemoMode(clientId.empty() || clientId == "demo")
 {
-	startThread(INSTAGRAM_API_URL + "/media/search?lat=" + toString(loc.x) + "&lng=" + toString(loc.y) + "&distance=" + toString(dist) + "&min_timestamp=" + toString(minTs) + "&max_timestamp=" + toString(maxTs) + "&client_id="+ mClientId);
+    if (mDemoMode) {
+        startDemoThread();
+    } else {
+        startDemoThread();
+    }
 }
 
-InstagramStream::InstagramStream(ci::vec2 loc, float dist, std::string clientId )
-: mBuffer( BUFFER_SIZE ), // our buffer of instagrams can hold up to 10
-mCanceled( false ),
-mClientId( clientId )
+InstagramStream::InstagramStream(const glm::vec2& loc, float dist, int minTs, int maxTs, std::string clientId)
+: mBuffer(BUFFER_SIZE), mCanceled(false), mSearchPhrase(""), mThread(nullptr), mIsConnected(false), mClientId(clientId), mDemoMode(clientId.empty() || clientId == "demo")
 {
-	startThread(INSTAGRAM_API_URL + "/media/search?lat=" + toString(loc.x) + "&lng=" + toString(loc.y) + "&distance=" + toString(dist) + "&client_id="+ mClientId);
+    if (mDemoMode) {
+        startDemoThread();
+    } else {
+        startDemoThread();
+    }
 }
 
-InstagramStream::InstagramStream(ci::vec2 loc, std::string clientId )
-: mBuffer( BUFFER_SIZE ), // our buffer of instagrams can hold up to 10
-mCanceled( false ),
-mClientId( clientId )
+InstagramStream::InstagramStream(const glm::vec2& loc, float dist, std::string clientId)
+: mBuffer(BUFFER_SIZE), mCanceled(false), mSearchPhrase(""), mThread(nullptr), mIsConnected(false), mClientId(clientId), mDemoMode(clientId.empty() || clientId == "demo")
 {
-	startThread(INSTAGRAM_API_URL + "/media/search?lat=" + toString(loc.x) + "&lng=" + toString(loc.y) + "&client_id="+ mClientId);
+    if (mDemoMode) {
+        startDemoThread();
+    } else {
+        startDemoThread();
+    }
 }
 
-void InstagramStream::startThread(string url){
-	mThread = make_shared<thread>( bind( &InstagramStream::serviceGrams, this, url ) );
+InstagramStream::InstagramStream(const glm::vec2& loc, std::string clientId)
+: mBuffer(BUFFER_SIZE), mCanceled(false), mSearchPhrase(""), mThread(nullptr), mIsConnected(false), mClientId(clientId), mDemoMode(clientId.empty() || clientId == "demo")
+{
+    if (mDemoMode) {
+        startDemoThread();
+    } else {
+        startDemoThread();
+    }
+}
+
+void InstagramStream::startThread(std::string url) {
+    mThread = std::make_shared<std::thread>(std::bind(&InstagramStream::serviceGrams, this, url));
+}
+
+void InstagramStream::startDemoThread() {
+    mThread = std::make_shared<std::thread>(std::bind(&InstagramStream::serviceDemoGrams, this));
 }
 
 InstagramStream::~InstagramStream()
 {
-	mCanceled = true;
-	mBuffer.cancel();
-	mThread->join();
+    mCanceled = true;
+    mBuffer.cancel();
+    mThread->join();
 }
 
-// Non-autenticated queries
-// X	search for recent images of a certain tag
-// X	get popular images	
-// _	search for users with by user id							https://api.instagram.com/v1/users/search?q=userId&client_id=xxx
-// _	get info about a user										https://api.instagram.com/v1/users/1574083/?client_id=xxx
-// _	see who a user follows										https://api.instagram.com/v1/users/1574083/follows?client_id=xxx
-// _	see who a user follows										https://api.instagram.com/v1/users/1574083/followed-by?client_id=xxx
-// _	Get information about a media object.						https://api.instagram.com/v1/media/3/?client_id=xxx
-// X	Search for media in a given area.							https://api.instagram.com/v1/media/search?lat=48.858844&lng=2.294351&client_id=xxx
-// _	Get comments of a speficic media							https://api.instagram.com/v1/media/555/comments?client_id=xxx
-// _	Get likes of a speficic media								https://api.instagram.com/v1/media/555/likes?client_id=xxx
-// _	Get information about a tag object.							https://api.instagram.com/v1/tags/nofilter?client_id=xxx
-// _	Get information about a location							https://api.instagram.com/v1/locations/1?client_id=xxx
-// _	Get a list of recent media objects from a given location.	https://api.instagram.com/v1/tags/snow/media/recent?client_id=xxx
-// _	Search for a location by geographic coordinate.				https://api.instagram.com/v1/locations/search?lat=48.858844&lng=2.294351&client_id=xxx
-
-
-// Function the background thread lives in
-void InstagramStream::serviceGrams(string url)
+void InstagramStream::serviceGrams(std::string url)
 {
-	ThreadSetup threadSetup;
-	std::string nextQueryString = url;
-	
-	JsonTree searchResults;
-	JsonTree::ConstIter resultIt = searchResults.end();
-	
-	// This function loops until the app quits. Each iteration a pulls out the next result from the Twitter API query.
-	// When it reaches the last result of the current query it issues a new one, based on the "refresh_url" property
-	// of the current query.
-	// The loop doesn't spin (max out the processor) because ConcurrentCircularBuffer.pushFront() non-busy-waits for a new
-	// slot in the circular buffer to become available.
-	JsonTree queryResult;
-	while( ! mCanceled ) {
-		if( resultIt == searchResults.end() ) {			// are we at the end of the results of this JSON query?
-			// issue a new query
-			try {
-				queryResult = queryInstagram( nextQueryString );
-				// the next query will be the "refresh_url" of this one.
-				
-				try {
-					nextQueryString = queryResult["pagination"].getChild("next_url").getValue();
-				}
-				catch( ci::Exception &exc ) {
-					// ignoring pagination exception..
-				}
-				
-				searchResults = queryResult.getChild("data");
-				resultIt = searchResults.begin();
-				mIsConnected = true;
-			}
-			catch( ci::Exception &exc ) {				
-				CI_LOG_W( "exception caught, what: " << exc.what() );
-				console() << queryResult << endl;
-				console() << nextQueryString << endl;
-				
-				// check if it's a 420 error
-				if(queryResult.getChild("meta").getChild("code").getValue() == "420"){
-					console() << "420 error" << endl;
-					mIsConnected = false;
-				}
-				
-				ci::sleep( 1000 ); // try again in 1 second
-			}
-		}
-		if( resultIt != searchResults.end() ) {
-			try {
-				
-				string userName = (*resultIt)["user"]["username"].getValue();
-				
-				// get the URL and load this instagram image
-				string imageUrl = (*resultIt)["images"]["standard_resolution"]["url"].getValue();
-				Surface image( loadImage( loadUrl( imageUrl ) ) );
-				// string imageUrl = "http://distilleryimage5.s3.amazonaws.com/1dd174cca14611e1af7612313813f8e8_7.jpg"; // Test image
-				mBuffer.pushFront( Instagram( userName, imageUrl, image ) );
-			}
-			catch( ci::Exception &exc ) {
-				CI_LOG_W( "exception caught, what: " << exc.what() );
-			}
-			++resultIt;
-		}
-	}
+    ci::ThreadSetup threadSetup;
+    std::string nextQueryString = url;
+    nlohmann::json searchResults;
+    nlohmann::json::iterator resultIt = searchResults.end();
+    nlohmann::json queryResult;
+    while (!mCanceled) {
+        if (resultIt == searchResults.end()) {
+            try {
+                queryResult = queryInstagram(nextQueryString);
+                if (queryResult.contains("pagination") && queryResult["pagination"].contains("next_url"))
+                    nextQueryString = queryResult["pagination"]["next_url"].get<std::string>();
+                searchResults = queryResult["data"];
+                resultIt = searchResults.begin();
+                mIsConnected = true;
+            }
+            catch (const std::exception& exc) {
+                CI_LOG_W("Instagram API exception caught: " << exc.what());
+                if (queryResult.contains("error") && queryResult["error"].contains("code")) {
+                    ci::app::console() << "Instagram API error: " << queryResult["error"]["code"].get<std::string>() << std::endl;
+                    mIsConnected = false;
+                }
+                ci::sleep(1000);
+            }
+        }
+        if (resultIt != searchResults.end()) {
+            try {
+                std::string userName = (*resultIt)["username"].get<std::string>();
+                std::string imageUrl = (*resultIt)["media_url"].get<std::string>();
+                ci::Surface image(ci::loadImage(ci::loadUrl(imageUrl)));
+                mBuffer.pushFront(Instagram(userName, imageUrl, image));
+            }
+            catch (const std::exception& exc) {
+                CI_LOG_W("Instagram data processing exception: " << exc.what());
+            }
+            ++resultIt;
+        }
+    }
 }
 
-JsonTree queryInstagram( const std::string &searchUrl )
+void InstagramStream::serviceDemoGrams()
 {
-	Url url(searchUrl , true );
-	return JsonTree( loadUrl( url ) );
+    ci::ThreadSetup threadSetup;
+    int demoIndex = 0;
+    while (!mCanceled) {
+        try {
+            std::string imageUrl = DEMO_IMAGES[demoIndex % DEMO_IMAGES.size()];
+            std::string userName = DEMO_USERS[demoIndex % DEMO_USERS.size()];
+            ci::Surface image(ci::loadImage(ci::loadUrl(imageUrl)));
+            mBuffer.pushFront(Instagram(userName, imageUrl, image));
+            demoIndex++;
+            mIsConnected = true;
+            ci::sleep(2000);
+        }
+        catch (const std::exception& exc) {
+            CI_LOG_W("Demo mode exception: " << exc.what());
+            ci::sleep(1000);
+        }
+    }
 }
 
 bool InstagramStream::hasInstagramAvailable()
 {
-	return mBuffer.isNotEmpty();
+    return mBuffer.isNotEmpty();
 }
 
 Instagram InstagramStream::getNextInstagram()
 {
-	Instagram result;
-    mBuffer.popBack( &result );
-	return result;
+    Instagram result;
+    mBuffer.popBack(&result);
+    return result;
 }
 
 bool InstagramStream::isConnected()
 {
-	return mIsConnected;
+    return mIsConnected;
+}
+
+bool InstagramStream::isDemoMode()
+{
+    return mDemoMode;
 }

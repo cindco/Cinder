@@ -39,12 +39,14 @@ class CompassApp : public App {
 
 void CompassApp::setup()
 {
+#if defined( CINDER_COCOA_TOUCH ) || defined( CINDER_ANDROID )
 	getSignalSupportedOrientations().connect( [] { return InterfaceOrientation::All; } );
 
 	if( ! MotionManager::isNorthReliable() )
 		CI_LOG_W( "North is not dependable on your device." );
 
-    MotionManager::enable( 60.0f );
+	MotionManager::enable( 60.0f );
+#endif
 
 	mCam.setEyePoint( vec3( 0 ) );
 
@@ -76,7 +78,12 @@ void CompassApp::resize()
 
 void CompassApp::update()
 {
+#if defined( CINDER_COCOA_TOUCH ) || defined( CINDER_ANDROID )
 	mCam.setOrientation( MotionManager::getRotation( getOrientation() ) );
+#else
+	// On desktop, do nothing or set a default orientation if needed
+	// mCam.setOrientation( quat() );
+#endif
 }
 
 void CompassApp::draw()
