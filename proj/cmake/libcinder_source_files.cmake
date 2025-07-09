@@ -374,23 +374,15 @@ endif()
 if( NOT CINDER_FREETYPE_USE_SYSTEM )
 	list( APPEND SRC_SET_FREETYPE
 		${CINDER_PATH}/include/freetype/src/autofit/autofit.c
-		${CINDER_PATH}/include/freetype/src/base/ftbase.c
-		${CINDER_PATH}/include/freetype/src/base/ftbbox.c
-		${CINDER_PATH}/include/freetype/src/base/ftbdf.c
-		${CINDER_PATH}/include/freetype/src/base/ftbitmap.c
-		${CINDER_PATH}/include/freetype/src/base/ftcid.c
-		${CINDER_PATH}/include/freetype/src/base/ftdebug.c
-		${CINDER_PATH}/include/freetype/src/base/ftfstype.c
-		${CINDER_PATH}/include/freetype/src/base/ftgasp.c
-		${CINDER_PATH}/include/freetype/src/base/ftglyph.c
-		${CINDER_PATH}/include/freetype/src/base/ftgxval.c
-		${CINDER_PATH}/include/freetype/src/base/ftinit.c
-		${CINDER_PATH}/include/freetype/src/base/ftmm.c
-		${CINDER_PATH}/include/freetype/src/base/ftotval.c
-		${CINDER_PATH}/include/freetype/src/base/ftpatent.c
-		${CINDER_PATH}/include/freetype/src/base/ftpfr.c
-		${CINDER_PATH}/include/freetype/src/base/ftstroke.c
-		${CINDER_PATH}/include/freetype/src/base/ftsynth.c
+		${CINDER_PATH}/include/freetype/src/bdf/bdf.c
+		${CINDER_PATH}/include/freetype/src/cff/cff.c
+		${CINDER_PATH}/include/freetype/src/pcf/pcf.c
+		${CINDER_PATH}/include/freetype/src/pfr/pfr.c
+		${CINDER_PATH}/include/freetype/src/sfnt/sfnt.c
+		${CINDER_PATH}/include/freetype/src/truetype/truetype.c
+		${CINDER_PATH}/include/freetype/src/type1/type1.c
+		${CINDER_PATH}/include/freetype/src/type42/type42.c
+		${CINDER_PATH}/include/freetype/src/winfonts/winfnt.c
 		${CINDER_PATH}/include/freetype/src/base/fttype1.c
 		${CINDER_PATH}/include/freetype/src/base/ftwinfnt.c
 		${CINDER_PATH}/include/freetype/src/bdf/bdf.c
