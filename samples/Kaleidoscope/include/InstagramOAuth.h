@@ -3,8 +3,6 @@
 #include "cinder/app/App.h"
 #include <string>
 
-namespace ci {
-
 class InstagramOAuth {
 public:
     static std::string getAuthUrl(const std::string& clientId, const std::string& redirectUri);
@@ -24,6 +22,4 @@ private:
     static const std::string INSTAGRAM_AUTH_URL;
     static const std::string INSTAGRAM_TOKEN_URL;
     static const std::string TOKEN_FILE_NAME;
-};
-
-} // namespace ci 
+}; 

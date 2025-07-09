@@ -1,12 +1,12 @@
 #include "InstagramOAuth.h"
-#include "cinder/Url.h"
 #include "cinder/Utilities.h"
 #include "cinder/Log.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <sstream>
+#include <httplib.h>
 
-namespace ci {
+using namespace ci;
 
 const std::string InstagramOAuth::INSTAGRAM_AUTH_URL = "https://api.instagram.com/oauth/authorize";
 const std::string InstagramOAuth::INSTAGRAM_TOKEN_URL = "https://api.instagram.com/oauth/access_token";
@@ -15,7 +15,7 @@ const std::string InstagramOAuth::TOKEN_FILE_NAME = "instagram_tokens.txt";
 std::string InstagramOAuth::getAuthUrl(const std::string& clientId, const std::string& redirectUri)
 {
     std::string authUrl = INSTAGRAM_AUTH_URL + "?client_id=" + clientId +
-                          "&redirect_uri=" + Url::encode(redirectUri) +
+                          "&redirect_uri=" + ci::Url::encode(redirectUri) +
                           "&scope=user_profile,user_media" +
                           "&response_type=code";
     return authUrl;
@@ -25,27 +25,31 @@ std::string InstagramOAuth::exchangeCodeForToken(const std::string& clientId, co
                                                 const std::string& code, const std::string& redirectUri)
 {
     try {
-        std::string postData = "client_id=" + clientId +
-                              "&client_secret=" + clientSecret +
-                              "&grant_type=authorization_code" +
-                              "&redirect_uri=" + Url::encode(redirectUri) +
-                              "&code=" + code;
-        Url url(INSTAGRAM_TOKEN_URL, true);
-        url.setPostData(postData);
-        auto response = loadUrl(url);
-        std::stringstream buffer;
-        buffer << response->getBuffer()->getData();
-        auto jsonResponse = nlohmann::json::parse(buffer.str());
-        if (jsonResponse.contains("access_token")) {
-            std::string accessToken = jsonResponse["access_token"].get<std::string>();
-            std::string refreshToken = "";
-            if (jsonResponse.contains("refresh_token")) {
-                refreshToken = jsonResponse["refresh_token"].get<std::string>();
+        httplib::Client cli("https://api.instagram.com");
+        httplib::Params params = {
+            {"client_id", clientId},
+            {"client_secret", clientSecret},
+            {"grant_type", "authorization_code"},
+            {"redirect_uri", redirectUri},
+            {"code", code}
+        };
+        auto res = cli.Post("/oauth/access_token", params);
+        if (res && res->status == 200) {
+            auto jsonResponse = nlohmann::json::parse(res->body);
+            if (jsonResponse.contains("access_token")) {
+                std::string accessToken = jsonResponse["access_token"].get<std::string>();
+                std::string refreshToken = "";
+                if (jsonResponse.contains("refresh_token")) {
+                    refreshToken = jsonResponse["refresh_token"].get<std::string>();
+                }
+                saveAccessToken(accessToken, refreshToken);
+                return accessToken;
+            } else {
+                CI_LOG_E("Failed to exchange code for token: " << res->body);
+                return "";
             }
-            saveAccessToken(accessToken, refreshToken);
-            return accessToken;
         } else {
-            CI_LOG_E("Failed to exchange code for token: " << buffer.str());
+            CI_LOG_E("HTTP error in exchangeCodeForToken: " << (res ? std::to_string(res->status) : "no response"));
             return "";
         }
     }
@@ -59,26 +63,30 @@ std::string InstagramOAuth::refreshAccessToken(const std::string& clientId, cons
                                              const std::string& refreshToken)
 {
     try {
-        std::string postData = "client_id=" + clientId +
-                              "&client_secret=" + clientSecret +
-                              "&grant_type=refresh_token" +
-                              "&refresh_token=" + refreshToken;
-        Url url(INSTAGRAM_TOKEN_URL, true);
-        url.setPostData(postData);
-        auto response = loadUrl(url);
-        std::stringstream buffer;
-        buffer << response->getBuffer()->getData();
-        auto jsonResponse = nlohmann::json::parse(buffer.str());
-        if (jsonResponse.contains("access_token")) {
-            std::string accessToken = jsonResponse["access_token"].get<std::string>();
-            std::string newRefreshToken = refreshToken;
-            if (jsonResponse.contains("refresh_token")) {
-                newRefreshToken = jsonResponse["refresh_token"].get<std::string>();
+        httplib::Client cli("https://api.instagram.com");
+        httplib::Params params = {
+            {"client_id", clientId},
+            {"client_secret", clientSecret},
+            {"grant_type", "refresh_token"},
+            {"refresh_token", refreshToken}
+        };
+        auto res = cli.Post("/oauth/access_token", params);
+        if (res && res->status == 200) {
+            auto jsonResponse = nlohmann::json::parse(res->body);
+            if (jsonResponse.contains("access_token")) {
+                std::string accessToken = jsonResponse["access_token"].get<std::string>();
+                std::string newRefreshToken = refreshToken;
+                if (jsonResponse.contains("refresh_token")) {
+                    newRefreshToken = jsonResponse["refresh_token"].get<std::string>();
+                }
+                saveAccessToken(accessToken, newRefreshToken);
+                return accessToken;
+            } else {
+                CI_LOG_E("Failed to refresh token: " << res->body);
+                return "";
             }
-            saveAccessToken(accessToken, newRefreshToken);
-            return accessToken;
         } else {
-            CI_LOG_E("Failed to refresh token: " << buffer.str());
+            CI_LOG_E("HTTP error in refreshAccessToken: " << (res ? std::to_string(res->status) : "no response"));
             return "";
         }
     }
@@ -176,6 +184,4 @@ bool InstagramOAuth::isTokenExpired(const std::string& token)
 std::string InstagramOAuth::getTokenExpirationDate(const std::string& token)
 {
     return "";
-}
-
-} // namespace ci 
+} 

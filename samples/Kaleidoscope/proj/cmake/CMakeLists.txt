@@ -1,6 +1,9 @@
 cmake_minimum_required( VERSION 3.10 FATAL_ERROR )
 set( CMAKE_VERBOSE_MAKEFILE ON )
 
+# Force MSVC to use the dynamic runtime (/MD)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL" CACHE STRING "" FORCE)
+
 project( Kaleidoscope )
 
 get_filename_component( CINDER_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../../../.." ABSOLUTE )
@@ -17,3 +20,6 @@ ci_make_app(
     INCLUDES    ${APP_PATH}/include
     CINDER_PATH ${CINDER_PATH}
 )
+
+# Force the app target to use the dynamic runtime (/MD)
+set_property(TARGET ${CMAKE_PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
