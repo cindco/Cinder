@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<cinder>
+<block
+	name="InstagramOAuth"
+	id="org.libcinder.instagram_oauth"
+	author="Cinder Project"
+	summary="Instagram Basic Display API OAuth authentication and API wrapper."
+	core="false"
+	>
+	<supports os="windows" />
+	<supports os="macosx" />
+	<supports os="ios" />
+	<supports os="linux" />
+	<source>src/InstagramOAuth.cpp</source>
+	<source>src/InstagramStream.cpp</source>
+	<header>include/InstagramOAuth.h</header>
+	<header>include/InstagramStream.h</header>
+	<includePath>include</includePath>
+	<sample>InstagramOAuthHelperApp</sample>
+</block>
+</cinder> 
