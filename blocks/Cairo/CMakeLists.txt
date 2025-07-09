@@ -18,4 +18,16 @@ if(WIN32)
             gdi32
             user32
     )
+endif()
+
+if(APPLE)
+    target_include_directories(CinderBlock-Cairo PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}/include/macosx
+    )
+    target_link_libraries(CinderBlock-Cairo
+        PUBLIC
+            ${CMAKE_CURRENT_LIST_DIR}/lib/macosx/libcairo.a
+            ${CMAKE_CURRENT_LIST_DIR}/lib/macosx/libpixman-1.a
+            ${CMAKE_CURRENT_LIST_DIR}/lib/macosx/libpng16.a
+    )
 endif() 
