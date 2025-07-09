@@ -10,9 +10,11 @@ include( "${CINDER_PATH}/proj/cmake/modules/cinderMakeApp.cmake" )
 
 file(GLOB SRC_FILES "${APP_PATH}/src/*.cpp")
 
+if(APPLE OR CINDER_ANDROID)
 ci_make_app(
-	SOURCES     ${SRC_FILES}
-	CINDER_PATH ${CINDER_PATH}
-	INCLUDES    ${APP_PATH}/include
-	BLOCKS      MotionManager
+    SOURCES     ${SRC_FILES}
+    CINDER_PATH ${CINDER_PATH}
+    INCLUDES    ${APP_PATH}/include
+    BLOCKS      MotionManager
 )
+endif()
